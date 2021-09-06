@@ -32,11 +32,15 @@ clock: 1.2 | 1.6 | 1.92 | 2.4 | 3.2 | 4.8
 duration(sec) is limited by memory.
 ch: ch1 | ch2 | ch1+2
 
+prevent overflow error, use `chrt`
+
+
+
 for example:
 
 ```
 sudo pdm_start 2.4
-sudo pdm_rec 180 ch1 > rec01.dat
+sudo chrt -f 99 pdm_rec 180 ch1 > rec01.dat
 ```
 
 rec01.dat is
