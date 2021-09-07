@@ -9,7 +9,7 @@ Edit `pi_perif.h`
 Uncomment `PERI_BASE`
 
 ```
-gcc -O2 -o pdm_satrt pdm_start.c pi_perif.c
+gcc -O2 -o pdm_start pdm_start.c pi_perif.c
 gcc -O2 -o pdm_rec pdm_rec.c pi_perif.c
 sudo cp pdm_start /usr/bin/
 sudo cp pdm_rec /usr/bin/
