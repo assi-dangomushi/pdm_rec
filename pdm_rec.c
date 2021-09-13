@@ -36,20 +36,20 @@ void print_help(void){
     "");
 }
 
-void ch1(int16_t *data, int32_t *i){
+void ch2(int16_t *data, int32_t *i){
   *(data + *i) = (*pcm_fifo >> 16) - (1<<15);
   *i = *i + 1;
 }
 
-void ch2(int16_t *data, int32_t *i){
+void ch1(int16_t *data, int32_t *i){
   *(data + *i) = (*pcm_fifo & 0x0000FFFF) - (1<<15);
   *i = *i + 1;
 }
 
 void ch12(int16_t *data, int32_t *i){
   uint32_t tmp;
-  *(data + *i) = ((tmp = *pcm_fifo) >> 16) - (1<<15);
-  *(data + *i + 1) = (tmp & 0x0000FFFF) - (1<<15);
+  *(data + *i) = ((tmp = *pcm_fifo) & 0x0000FFFF) - (1<<15);
+  *(data + *i + 1) = (tmp >> 16) - (1<<15);
   *i = *i + 2;
 }
 
@@ -58,7 +58,10 @@ int main(int argc, char **argv){
   int32_t clock;
   int r;
   FILE *fp;
-  fp = fopen(STATUS_FILE, "r");
+  if ((fp = fopen(STATUS_FILE, "r")) == NULL) {
+    print_help();
+    exit(1);
+  }
   r = fread(&clock, sizeof(int) ,1 ,fp);
   fclose(fp);
 
