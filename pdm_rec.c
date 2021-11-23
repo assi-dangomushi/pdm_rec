@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// pdm_rec.c ver. 0.1
+// pdm_rec.c ver. 0.2
 
 #include <stdio.h>
 #include <unistd.h>
@@ -29,7 +29,7 @@
 
 void print_help(void){
   fprintf(stderr, ""
-    "Usage : sudo pdm_rec duration(sec) ch\n"
+    "Usage : sudo chrt -f 99 pdm_rec duration(sec) ch\n"
     "ch:  ch1 | ch2 | ch1+2\n"
     "output data to stdout\n"
     "run 'pdm_start' befor pdm_rec\n"
@@ -62,14 +62,13 @@ int main(int argc, char **argv){
     print_help();
     exit(1);
   }
-  r = fread(&clock, sizeof(int) ,1 ,fp);
+  r = fread(&clock, sizeof(int32_t) ,1 ,fp);
   fclose(fp);
 
   if ((argc != 3) || (r != 1)){
     print_help();
     exit(1);
   }
-  clock = clock * 1000;
 
   int32_t duration = strtol(argv[1], NULL, 0);
   if (duration == 0){

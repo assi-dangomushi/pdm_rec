@@ -5,8 +5,6 @@ Record on memory, and output to stdout.
 
 ## Install
 
-Edit `pi_perif.h`
-Uncomment `PERI_BASE`
 
 ```
 gcc -O2 -o pdm_start pdm_start.c pi_perif.c
@@ -23,9 +21,10 @@ GPIO 20 is PCM\_DIN
 
 You Must run pdm\_start befor pdm\_rec
 
-`sudo pdm_satrt clock`
+`sudo pdm_satrt clock(MHz)`
+ Example : sudo pdm_start 4.8
 
-clock: 1.2 | 1.6 | 1.92 | 2.4 | 3.2 | 4.8
+The actual clock will not exceed the specified value. 
 
 `sudo pdm_rec duration ch`
 

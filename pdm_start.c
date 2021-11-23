@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//pdm_start.c ver. 0.1
+//pdm_start.c ver. 0.2
 
 #include <stdio.h>
 #include <unistd.h>
@@ -28,43 +28,37 @@
 
 void print_help(void){
   fprintf(stderr, ""
-    "Usage : sudo pdm_start clock\n"
-    "clock:  1.2 | 1.6 | 1.92 | 2.4 | 3.2 | 4.8  (MHz)\n"
+    "Usage : sudo pdm_start clock(MHz)\n"
+    "Example : sudo pdm_start 4.8\n"
     );
 }
 
 int main(int argc, char **argv){
+  int32_t osc;
+  switch (chk_pi4()) {
+    case 40:
+      osc = 54000000;
+      break;
+    case 30:
+    case 31:
+    case 32:
+    case 20:
+    case 0:
+      osc = 19200000;
+      break;
+    default:
+      exit(1);
+  }
 
   if (argc != 2){
     print_help();
     exit(1);
   }
-  int clock = (int)(atof(argv[1])*1000);
+  int32_t clock = (int)(atof(argv[1])*1000000);
   int div;
-  switch (clock){
-    case 1200:
-      div = 16;
-      break;
-    case 1600:
-      div = 12;
-      break;
-    case 1920:
-      div = 10;
-      break;
-    case 2400:
-      div = 8;
-      break;
-    case 3200:
-      div = 6;
-      break;
-    case 4800:
-      div = 4;
-      break;
-    default:
-      fprintf(stderr, "clock is invalid！\n");
-      print_help();
-      exit(1);
-  }
+  div = (osc + clock - 1) / clock; 
+  clock = osc / div;
+  fprintf(stderr, "osc = %d,  div =%d,  clock = %d\n", osc, div, osc / div);
 
   init_perif();
 
@@ -102,7 +96,7 @@ int main(int argc, char **argv){
   sleep(1);
   FILE *fp;
   fp = fopen(STATUS_FILE, "w");
-  fwrite(&clock, sizeof(int) , 1, fp);
+  fwrite(&clock, sizeof(int32_t) , 1, fp);
   fclose(fp);
 }
 

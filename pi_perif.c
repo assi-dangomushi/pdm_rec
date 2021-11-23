@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// pi_perif.c ver. 0.1
+// pi_perif.c ver. 0.2
 
 #include <stdio.h>
 #include <unistd.h>
@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <stdint.h>
+#include <string.h>
 #include "pi_perif.h"
 
 void *gpio_addr = 0;
@@ -57,8 +58,66 @@ volatile uint32_t *pcm_fifo = 0;
 volatile uint32_t *pcm_txc = 0;
 volatile uint32_t *pcm_rxc = 0;
 
+int chk_pi4(void)
+{
+  // 判別不能 -1
+  // pi4 40
+  // pi3B+ 31
+  // pi3A+ 32
+  // pi3 30
+  // pi2 20
+  // pi0  0
+  // その他 -2
+  FILE *fp;
+  const int N = 80;
+  char buf[N];
+
+  if ((fp = fopen("/proc/device-tree/model","r")) == NULL){
+      return -1;
+  }
+  fgets(buf, N, fp);
+  fclose(fp);
+
+  if ((strstr(buf, "Pi 4 ")) != NULL){
+    return 40;
+  }
+  if ((strstr(buf, "Pi 3 Model B Plus")) != NULL){
+    return 31;
+  }
+  if ((strstr(buf, "Pi 3 Model A Plus")) != NULL){
+    return 32;
+  }
+  if ((strstr(buf, "Pi 3 ")) != NULL){
+    return 30;
+  }
+  if ((strstr(buf, "Pi 2 ")) != NULL){
+    return 20;
+  }
+  if ((strstr(buf, "Pi Zero W ")) != NULL){
+    return 0;
+  }
+  return -2;
+}
 
 void init_perif(void){
+  uint32_t peri_base;
+  switch(chk_pi4()){
+    case 40:
+      peri_base = PERI_BASE_PI4;
+      break;
+    case 31:
+    case 32:
+    case 30:
+    case 20:
+      peri_base = PERI_BASE_PI2;
+      break;
+    case 0:
+      peri_base = PERI_BASE_PI0;
+      break;
+    default:
+      exit(1);
+  }
+
   long page_size = sysconf(_SC_PAGESIZE);
   //fprintf(stderr, "PAGE_SIZE = %d\n", page_size);
   int memfd;
@@ -66,10 +125,10 @@ void init_perif(void){
     fprintf(stderr, "Unable to open /dev/mem\n");
     exit (1);
   }
-  gpio_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, GPIO_BASE);
-  clock_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, CLOCK_BASE);
-  pwm_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, PWM_BASE);
-  pcm_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, PCM_BASE);
+  gpio_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, GPIO_BASE + peri_base);
+  clock_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, CLOCK_BASE + peri_base);
+  pwm_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, PWM_BASE + peri_base);
+  pcm_addr = mmap(NULL, page_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, PCM_BASE + peri_base);
   close(memfd);
 
   gpfsel0 = (uint32_t*)gpio_addr + GPFSEL0/4;

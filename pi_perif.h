@@ -16,19 +16,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// pi_perif.h ver 0.1
+// pi_perif.h ver 0.2
 
 #pragma once
 
-// Uncomment one of the following lines
-//#define PERI_BASE 0x20000000 //pi0
-//#define PERI_BASE 0x3F000000 //pi2 pi3
-//#define PERI_BASE 0xFE000000 //pi4
+#define PERI_BASE_PI0 0x20000000 //pi0
+#define PERI_BASE_PI2 0x3F000000 //pi2 pi3
+#define PERI_BASE_PI4 0xFE000000 //pi4
 
-#define GPIO_BASE (PERI_BASE + 0x200000) // GPIO controller
-#define PCM_BASE (PERI_BASE + 0x203000) // PCM/I2S
-#define CLOCK_BASE (PERI_BASE + 0x101000) // Clocks
-#define PWM_BASE (PERI_BASE + 0x20C000) // PWM 
+#define GPIO_BASE 0x200000 // GPIO controller
+#define PCM_BASE 0x203000 // PCM/I2S
+#define CLOCK_BASE 0x101000 // Clocks
+#define PWM_BASE 0x20C000 // PWM
 #define PAGE_SIZE (4*1024)
 #define BLOCK_SIZE (4*1024)
 
@@ -45,7 +44,7 @@
 #define CM_PWMCTL 0xa0
 #define CM_PWMDIV 0xa4
 
-// OSC=19.2MHz PLLC=1000MHz PLLD=500MHz HDMI=216MHz
+// OSC=(pi0-3:19.2MHz  pi4:54MHz) PLLC=1000MHz PLLD=500MHz HDMI=216MHz
 #define OSC 1
 #define PLLC 5
 #define PLLD 6
@@ -124,6 +123,7 @@ extern volatile uint32_t *pcm_fifo;
 extern volatile uint32_t *pcm_txc;
 extern volatile uint32_t *pcm_rxc;
 
+int chk_pi4(void);
 void init_perif(void);
 
 
